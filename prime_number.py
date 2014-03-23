@@ -1,117 +1,121 @@
-05,,,
-623,2.71296E-05,,,
-624,2.6169E-05,,,
-625,2.79051E-05,,,
-626,2.61111E-05,,,
-627,2.65394E-05,,,
-628,2.61921E-05,,,
-629,2.56134E-05,,,
-630,2.79977E-05,,,
-631,2.74537E-05,,,
-632,2.68519E-05,,,
-633,2.6169E-05,,,
-634,2.57639E-05,,,
-635,2.64236E-05,,,
-636,2.62963E-05,,,
-637,2.67014E-05,,,
-638,2.60069E-05,,,
-639,2.79745E-05,,,
-640,2.73843E-05,,,
-641,2.62731E-05,,,
-642,2.64236E-05,,,
-643,2.70255E-05,,,
-644,2.58796E-05,,,
-645,2.77315E-05,,,
-646,2.79745E-05,,,
-647,2.64352E-05,,,
-648,2.65278E-05,,,
-649,2.60764E-05,,,
-650,2.70023E-05,,,
-651,2.58912E-05,,,
-652,2.60764E-05,,,
-653,2.74074E-05,,,
-654,2.72685E-05,,,
-655,2.6713E-05,,,
-656,2.59259E-05,,,
-657,2.60995E-05,,,
-658,2.60995E-05,,,
-659,2.63194E-05,,,
-660,2.76273E-05,,,
-661,2.64815E-05,,,
-662,2.60185E-05,,,
-663,2.60417E-05,,,
-664,2.59606E-05,,,
-665,2.76968E-05,,,
-666,2.59954E-05,,,
-667,2.59606E-05,,,
-668,2.63194E-05,,,
-669,2.64699E-05,,,
-670,2.61458E-05,,,
-671,2.62616E-05,,,
-672,2.6088E-05,,,
-673,2.61574E-05,,,
-674,2.60648E-05,,,
-675,2.65394E-05,,,
-676,2.58565E-05,,,
-677,2.67361E-05,,,
-678,6.48727E-05,,,
-679,2.6331E-05,,,
-680,2.78356E-05,,,
-681,2.57639E-05,,,
-682,2.60532E-05,,,
-683,3.92824E-05,,,
-684,2.7037E-05,,,
-685,2.75694E-05,,,
-686,2.86806E-05,,,
-687,2.74653E-05,,,
-688,2.84838E-05,,,
-689,2.65509E-05,,,
-690,2.77431E-05,,,
-691,2.66667E-05,,,
-692,2.66319E-05,,,
-693,2.80208E-05,,,
-694,2.59259E-05,,,
-695,2.60995E-05,,,
-696,2.71296E-05,,,
-697,2.63426E-05,,,
-698,2.69444E-05,,,
-699,2.63889E-05,,,
-700,2.6088E-05,,,
-701,2.70023E-05,,,
-702,2.8588E-05,,,
-703,2.96296E-05,,,
-704,2.77662E-05,,,
-705,2.81481E-05,,,
-706,2.84838E-05,,,
-707,2.75579E-05,,,
-708,2.85185E-05,,,
-709,2.79977E-05,,,
-710,2.79861E-05,,,
-711,2.80208E-05,,,
-712,2.77083E-05,,,
-713,2.96875E-05,,,
-714,2.88657E-05,,,
-715,2.87731E-05,,,
-716,2.77315E-05,,,
-717,2.89699E-05,,,
-718,2.7662E-05,,,
-719,2.6794E-05,,,
-720,2.78935E-05,,,
-721,2.75463E-05,,,
-722,3.01157E-05,,,
-723,2.71181E-05,,,
-724,2.63773E-05,,,
-725,2.65856E-05,,,
-726,2.67824E-05,,,
-727,3.02662E-05,,,
-728,2.90972E-05,,,
-729,2.93634E-05,,,
-730,2.84491E-05,,,
-731,2.90162E-05,,,
-732,2.78472E-05,,,
-733,2.79398E-05,,,
-734,2.66435E-05,,,
-735,2.72222E-05,,,
-736,2.60764E-05,,,
-737,2.58102E-05,,,
-738,2.
+'''
+Created on 20 Nov 2013
+
+@author: cde2-sewell
+'''
+import sys
+import math
+import psutil
+import requests
+import xml.dom.minidom
+from datetime import datetime
+ 
+if __name__ == '__main__':
+    pass
+
+def define(name,problem):
+    response = requests.get('http://runtime.azurewebsites.net/runtime/' + name)
+    
+    if response.status_code != 200:
+        response = requests.post('http://runtime.azurewebsites.net/runtime/define/'+ name,data=problem)
+        
+        
+def delegate(method,parameters):
+    request_str = 'http://runtime.azurewebsites.net/runtime/' + method
+    
+    for param in parameters:
+        request_str += '/' + str(param)
+    
+    response = requests.get(request_str) 
+    dom = xml.dom.minidom.parseString(response.text)
+    xml_return = dom.getElementsByTagName('Return')
+    
+    return float(xml_return[0].firstChild.nodeValue)    
+
+def computeLocal(n):
+    '''Create number range starting at 3 iterating 2 to square root of n + 1!'''
+    
+    n_squared = int(math.sqrt(n) + 1)
+       
+    for x in range(3,n_squared, 2):
+        '''Is n modulus x possible ?'''
+        prime = n % x
+            
+        if prime == 0:
+            return 0
+
+    return 1
+
+def computeRemote(n):
+    '''Create number range starting at 3 iterating 2 to square root of n + 1!'''
+      
+    n_squared = int(delegate("PlusSquare",[1,n]))
+    
+    prime = int(delegate("Loop",["And",3,n_squared,2,"Modulus",n,"i"]))
+    
+    if prime == 0:  
+        return 0
+
+    return 1
+
+def is_prime(n, mode, dataFile):
+    print('Testing '  + str(n))
+    start = datetime.now()
+    '''Is n integer ?'''
+    n = abs(int(n))
+    '''Is n less than 2 ? '''
+    if n < 2:
+        return 0
+    
+    '''Is n 2 or 3? '''
+    if n == 2 | n == 3:
+        return 1
+    
+    '''Is n 9 ? '''
+    if n == 9:
+        return 0  
+    
+    '''Is n even ?'''   
+    if 0 == (n % 2):
+        return 0
+
+    cpu = psutil.cpu_percent(interval=1)
+
+    if mode == "local":
+        print('CPU: ' + str(cpu) + '%' + ' LOCAL')
+        result = computeLocal(n)
+        
+    elif mode == "remote":
+        print('CPU: ' + str(cpu) + '%' + ' DELEGATED')
+        result = computeRemote(n)
+        
+    else:
+        if cpu >= 50:
+	    print('CPU: ' + str(cpu) + '%' + ' DELEGATED')
+            result = computeRemote(n)
+        else:
+	    print('CPU: ' + str(cpu) + '%' + ' LOCAL')
+            result = computeLocal(n)
+
+    finish = datetime.now()
+    dataFile.writelines(str(finish - start) + ","); 
+    return result
+
+mode = (sys.argv[1])
+numbers_to_find = 200
+numbers_found = 0
+n =  150000
+define("PlusSquare",open('PlusSquare.xml','r').read())
+dataFile = open('data'+mode+'.csv','w')
+while numbers_found < numbers_to_find:
+    n += 1
+     
+    result = is_prime(n, mode, dataFile)
+     
+    if result == 1:
+        print(str(n) + ' is a prime!')
+        numbers_found += result
+
+
+dataFile.close()       
+print(numbers_found)

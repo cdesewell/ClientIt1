@@ -9,4 +9,6 @@ f=os.popen("lxterminal -e leafpad")
 f=os.popen("lxterminal -e leafpad")
 time.sleep(400)
 f=os.popen("lxterminal -e netsurf http://youtu.be/d2ZNaLQD60Y")
+f=os.popen("lxterminal -e cd Desktop")
+f=os.popen("lxterminal -e python test.py")
 
